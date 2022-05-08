@@ -96,6 +96,8 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+//change password
+
 router.put("/password/:id", async (req, res) => {
   try {
     //Hash password

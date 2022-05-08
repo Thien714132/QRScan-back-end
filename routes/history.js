@@ -112,7 +112,7 @@ router.get("/lesson/:id", async (req, res) => {
       } else newArr = [];
     }
     // console.log(b)
-    res.send({ courses: teacherExist, lesson: newArr });
+    res.send({history: newArr });
   });
 
 module.exports = router;
