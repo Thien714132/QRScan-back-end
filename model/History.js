@@ -54,6 +54,13 @@ const useSchema = new mongoose.Schema({
     max: 255,
     min: 6,
   },
+
+  device_name: {
+    type: String,
+    required: true,
+    max: 255,
+    min: 6,
+  },
 });
 
 module.exports = mongoose.model("History", useSchema);

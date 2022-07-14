@@ -3,12 +3,13 @@ const Course = require("../model/Course");
 const History = require("../model/History");
 const Lesson = require("../model/Lesson");
 const User = require("../model/User");
+const verify = require("./verifyToken");
 
 const router = require("express").Router();
 
 // create courses
 
-router.post("/", async (req, res) => {
+router.post("/", verify,async (req, res) => {
   const courseExist = await Course.findOne({
     classroom_name: req.body.classroom_name,
   });
@@ -38,7 +39,7 @@ router.post("/", async (req, res) => {
 
 //get course by id
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", verify,async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
     res.json(course);
@@ -49,7 +50,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", verify,async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
     res.json(course);
@@ -62,7 +63,7 @@ router.get("/:id", async (req, res) => {
 
 //get all courses
 
-router.get("/", async (req, res) => {
+router.get("/", verify,async (req, res) => {
   try {
     const course = await Course.find();
     res.json(course);
@@ -75,7 +76,7 @@ router.get("/", async (req, res) => {
 
 //Add student to course
 
-router.post("/:id/student", async (req, res) => {
+router.post("/:id/student", verify,async (req, res) => {
   const course = await Course.findById(req.params.id);
   if (!course) return res.status(400).send("Course doesn't exists");
   const studentExist = await course.students.find(
@@ -104,7 +105,7 @@ router.post("/:id/student", async (req, res) => {
 
 //get course and lesson by student id
 
-router.get("/student/:id", async (req, res) => {
+router.get("/student/:id",verify, async (req, res) => {
   var inCourse = [];
   try {
     const course = await Course.find();
@@ -152,7 +153,7 @@ router.get("/student/:id", async (req, res) => {
 
 //get course by teacher id
 
-router.get("/teacher/:id", async (req, res) => {
+router.get("/teacher/:id", verify,async (req, res) => {
   // var inCourse = [];
   try {
     const course = await Course.find();
@@ -189,7 +190,7 @@ router.get("/teacher/:id", async (req, res) => {
 
 //get statistics
 
-router.get("/:id/statistic", async (req, res) => {
+router.get("/:id/statistic", verify,async (req, res) => {
   const statistic = [];
   const history = await History.find();
   const course = await Course.findById(req.params.id);
@@ -208,17 +209,40 @@ router.get("/:id/statistic", async (req, res) => {
       name: " ",
       attendance: " ",
       lesson_attendance: [],
+      last_name: " ",
+      student_code: " "
     };
     for (var j = 0; j < A.length; j++) {
       B.lesson_attendance.push(A[j].lesson_name);
     }
+    var fixname = course.students[i].name.split(" ")
     B.student_id = course.students[i]._id;
     B.name = course.students[i].name;
     B.attendance = A.length;
+    B.last_name = fixname[fixname.length - 1]
+    B.student_code = course.students[i].student_code;
     statistic.push(B);
   }
   // console.log("____A",statistic)
   res.send({"statistic": statistic})
+});
+
+
+// delete course 
+router.delete("/:id", verify,async (req, res) => {
+  const courseExist = await Course.findById({ _id: req.params.id });
+  if (!courseExist) return res.status(400).send({message:"Course does't exists"});
+  try {
+    // const lesson = await Lesson.findById(req.params.id)
+    await Course.deleteOne({ _id: req.params.id });
+    await Lesson.deleteMany({ course_id: req.params.id });
+    await History.deleteMany({ course_id: req.params.id });
+    res.status(200).json({ message: "deleted" });
+  } catch (error) {
+    // res.status(400).send(error);
+
+    res.json({ message: error });
+  }
 });
 
 module.exports = router;

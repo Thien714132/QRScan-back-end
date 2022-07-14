@@ -85,7 +85,7 @@ router.get("/:id", verify, async (req, res) => {
 
 //change user infor
 
-router.put("/:id", async (req, res) => {
+router.put("/:id",verify, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(400).send({ message: "User doesn't exist" });
@@ -98,13 +98,18 @@ router.put("/:id", async (req, res) => {
 
 //change password
 
-router.put("/password/:id", async (req, res) => {
+router.put("/password/:id",verify, async (req, res) => {
   try {
     //Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
     const user = await User.findById(req.params.id);
     if (!user) return res.status(400).send({ message: "User doesn't exist" });
+
+    const validPassword = await bcrypt.compare(req.body.current_password, user.password);
+    if (!validPassword)
+      return res.status(400).send({ message: "Invalid password" });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
     const data = await User.updateOne(
       { _id: user._id },
       { $set: { password: hashedPassword } }

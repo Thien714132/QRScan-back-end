@@ -13,7 +13,7 @@ const useSchema = new mongoose.Schema({
     // required: true,
     max: 255,
     min: 6,
-    default: ""
+    default: "",
   },
   shift: {
     type: Number,
@@ -22,11 +22,11 @@ const useSchema = new mongoose.Schema({
 
   course_id: {
     type: Schema.Types.ObjectId,
-    ref: 'Course',
-    required: true
+    ref: "Course",
+    required: true,
   },
 
-  lesson_date:{
+  lesson_date: {
     type: Date,
     required: true,
   },
